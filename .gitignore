@@ -1,0 +1,23 @@
+# 忽略 Python 编译产生的缓存（垃圾文件）
+__pycache__/
+*.py[cod]
+
+
+# 忽略 ROS2 编译产物（非常重要，不要把 build 传上去）
+install/
+build/
+log/
+runs/
+
+# 忽略 IDE 产生的个人配置
+.vscode/
+
+# 忽略你提到的 index.lock（如果它总是出现）
+*.lock
+
+
+# 忽略大型数据样本（如果你不希望把几 GB 的视频样本传到 GitHub）
+
+data/mtf_samples/
+data/calib_raw/
+

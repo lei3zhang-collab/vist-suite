@@ -1,32 +1,25 @@
-# ROS2 视觉惯性与光学性能测试集成套件 (VIST-Suite)
+# VIST-Suite: 视觉-惯性传感器自动化评估平台
 
-本项目为一套针对工业级场景设计的 ROS2 解决方案，主要应用于 Astra Pro 立体相机与 WIT 运动传感器的集成测试。系统集成了视觉预处理、传感器融合校准以及高性能 MTF (调制传递函数) 实时分析模块。
+**VIST-Suite** (**V**ision-**I**nertial **S**ensor **T**esting Suite) 是一套针对机器人感知与自动驾驶模组设计的集成测试解决方案。以 Astra Pro 立体相机与 WIT 运动传感器为例，套件集成了全链路视觉预处理、多模态传感器校准及基于**ISO 12233:2023** 标准的（SFR/MTF）的实时计算模块。
 
 ## 系统架构 (System Architecture)
 
 系统架构采用边缘端采集与计算端分析相分离的分布式架构，旨在解决高分辨率图像处理中的实时性瓶颈：
 
 * **边缘端 (Edge Node)**：运行于 ROS2 环境，负责硬件驱动、图像预处理、基于 YOLO 的初步目标定位、UDP 数据分发及 IMU 数据的采集。
-* **计算端 (Computing Center)**：对接 [MTF-Master-Pro](https://www.google.com/search?q=https://github.com/your-username/MTF-Master-Pro) 引擎，执行 **ISO 12233:2023** 标准下的 SFR 推演、模型训练。
+* **计算端 (Computing Center)**：对接 [MTF-Master-Pro](https://www.google.com/search?q=https://github.com/your-username/MTF-Master-Pro) 引擎，执行 **ISO 12233:2023** 标准下的 MTF/SFR 推演、模型训练。
 
 ## 核心功能模块
 
 ### 1. MTF-Analyzer 光学质量评估
 
-基于工业影像测试标准，提供镜头解析力实时评估：
+基于工业影像测试标准，提供镜头解析力（MTF@0.25cycles/pixel）实时评估：
 
 ![MTF_Analyzer](assets/MTF_Analyzer.png)
-*图：MTF Analyzer 实时分析界面，显示 ROI 锁定与热力图*
-
-<div align="center">
-<video src="assets/MTF_Analyzer.mp4" width="80%" controls title="MTF 分析实时演示">
-您的浏览器不支持 HTML5 视频播放。
-</video>
-<p><em>视频：MTF Analyzer 实时分析界面，显示 ROI 锁定与热力图</em></p>
-</div>
+*图：MTF Analyzer 实时分析界面，显示 ROI 锁定与热力图, 视频见 assets/MTF_Analyzer.mp4*
 
 * 采用 YOLO26n 网络自动锁定视野内的 9 个标准采样区域 (ROI)。
-* 数据传输层使用**同步阻塞式 UDP 通信**，将 9个 150x150 ROI 区域转换为单通道亮度信号 (Y) 后上传至计算端，并在接收到 PC 端反馈后处理下一帧，确保了数据处理的严谨性与时序一致性。
+* 数据传输层使用**同步阻塞式 UDP 通信**，将 9 个 150x150 ROI 区域转换为单通道亮度信号 (Y) 后上传至计算端，并在接收到 PC 端反馈后处理下一帧，确保了数据处理的确定性与时序一致性。
 * 通过接收计算端回传的数据，利用 Scipy 库完成空间插值，生成二维 MTF 性能分布热力图。
 
 ### 2. Vision-Calibration 视觉校准与配准
@@ -41,28 +34,28 @@
   该步骤消除了双镜头间的物理偏差，是后续深度图重投影（Reprojection）至彩色图像坐标系的先决条件。
 
 ![MTF_sample_Capture](assets/MTF_sample_Capture.png)
-*图：RGB-IR 双镜头标定样本同步采集界面，采用 Opencv 标准 9×6 棋盘格标靶，打印后固定在亚克力板上*
+*图：RGB-IR 双镜头标定样本同步采集界面，采用 OpenCV 标准 9×6 棋盘格标靶，打印后固定在亚克力板上*
 
 | **校准前 (Before)** | **校准后 (After)** |
 | --- | --- |
 | ![before_Calibration](assets/before_Calibration.png) | ![after_Calibration](assets/after_Calibration.png) |
 
-* **VI-Lock 视觉-惯性 坐标系变换笔记**： 记录 `IMU` 与相机光学坐标系之间的映射、IMU 姿态存储与插值、以及将旋转增量映射到相机系后对锁定点进行重投影的完整流程。
+* **VI-Lock 视觉-惯性 坐标系变换模组**： 执行 `IMU` 与相机光学坐标系之间的映射、IMU 姿态存储与插值、以及将旋转增量映射到相机系后对锁定点进行重投影的完整流程。
   
   * **坐标系定义与旋转变换**： IMU (Body): x右, y前, z上；Camera (Optical): x右, y下, z前。固定旋转矩阵 $R_{i2c}$ 定义为绕 X 轴旋转 +90°：
-
+    
     $$
     R_{i2c}=\begin{bmatrix} 1 & 0 & 0\\ 0 & 0 & -1\\ 0 & 1 & 0 \end{bmatrix}
     $$
-
+    
     通过四元数 $q$ 构造归一化旋转矩阵 $R(q)$，并以 $(t_{ns}, R)$ 形式存入循环缓冲（2s 长度）。
   * **相对旋转量与相似变换**： 计算 IMU 基座相对旋转 $R_{\Delta}^{imu}=R_{start}^T R_{current}$，随后通过相似变换映射至相机坐标系：
-
+    
     $$
     R_{\Delta}^{cam}=R_{i2c}\,R_{\Delta}^{imu}\,R_{i2c}^T
     $$
   * **点跟随机制（反向旋转与重投影）**： 由于空间点在世界中静止，摄像机运动导致点在相机系中做“反向旋转”，利用 $(R_{\Delta}^{cam})^T$ 更新点坐标。
-
+    
     1. **反投影**（像素 -> 相机坐标）：利用深度 $Z$ 与内参 $K_{ir}$ 计算 $x = (u - c_x) Z / f_x, y = (v - c_y) Z / f_y$。
     2. **重投影**（相机坐标 -> 像素）：$u = f_x \frac{x}{z} + c_x, v = f_y \frac{y}{z} + c_y$。通过亚像素插值确保 MTF 采样区域始终锁定在标靶特征点上。
 
@@ -146,9 +139,8 @@ ros2 run mtf_analyzer mtf_detector_udp_node
 
 ## 联系方式
 
-* **开发者**：Zhang Lei (上海交通大学 机械工程系)
-* **技术方向**：Teststand/LabVIEW/Python 测试平台架构、计算机视觉、ROS2 机器人集成
+* **开发者**：Zhang Lei (上海交通大学 机械工程与自动化专业)
+* **资历**：19 年跨国 Tier 1 项目管理与智能摄像头自动化测试开发经验
+* **技术方向**：Teststand/LabVIEW/Python 并行自动测试平台架构开发、智能摄像头、计算机视觉、SFR算法、ROS2集成
 * **联系邮箱**：<lei.3.zhang@gmail.com>
-* **联系邮箱**：19 年跨国 Tier 1 模具开发与智能摄像头生产测试经验
-* **最后更新日期**：2026-02-16
-  
+* **最后更新日期**：2026-02-17

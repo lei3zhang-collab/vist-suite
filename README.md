@@ -67,6 +67,7 @@
     2. **重投影**（相机坐标 -> 像素）：$u = f_x \frac{x}{z} + c_x, v = f_y \frac{y}{z} + c_y$。通过亚像素插值确保 MTF 采样区域始终锁定在标靶特征点上。
 
 ![vi_target_lock](assets/vi_target_lock.gif)
+
 *图：VI-Lock 动态目标锁定演示*
 
 ### 3. Sensor-Bridge 传感器驱动集成
@@ -149,4 +150,5 @@ ros2 run mtf_analyzer mtf_detector_udp_node
 * **技术方向**：Teststand/LabVIEW/Python 测试平台架构、计算机视觉、ROS2 机器人集成
 * **联系邮箱**：<lei.3.zhang@gmail.com>
 * **联系邮箱**：19 年跨国 Tier 1 模具开发与智能摄像头生产测试经验
-  **最后更新日期**：2026-02-16
+* **最后更新日期**：2026-02-16
+  

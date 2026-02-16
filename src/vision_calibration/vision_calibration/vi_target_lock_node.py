@@ -165,8 +165,8 @@ class VITargetLockNode(AlignedMultiViewer):
                 R_delta_cam = self.R_imu_to_cam @ R_delta_imu @ self.R_imu_to_cam.T
 
                 # 3. 预测目标点在当前相机系下的新位置
-                # 因為是相機在動，空間點相對相機做「反向旋轉」
-                # 所以使用 R_delta_cam 的轉置 (即逆矩陣)
+                # 因为是相机在移动，空间点相对于相机做“反向旋转”
+                # 所以使用 R_delta_cam 的转置（即逆矩阵）
                 p_cam_now = R_delta_cam.T @ self.p_cam_start
                 tx, ty, tz = p_cam_now.flatten()
 

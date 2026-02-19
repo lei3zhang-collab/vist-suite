@@ -7,7 +7,7 @@
 系统架构采用边缘端采集与计算端分析相分离的分布式架构，旨在解决高分辨率图像处理中的实时性瓶颈：
 
 * **边缘端 (Edge Node)**：运行于 ROS2 环境，负责硬件驱动、图像预处理、基于 YOLO 的初步目标定位、UDP 数据分发及 IMU 数据的采集。
-* **计算端 (Computing Center)**：对接 [MTF-Master-Pro](https://www.google.com/search?q=https://github.com/your-username/MTF-Master-Pro) 引擎，执行 **ISO 12233:2023** 标准下的 MTF/SFR 推演、模型训练。
+* **计算端 (Computing Center)**：对接 [VIST-Compute-Core](https://github.com/lei3zhang-collab/vist-compute-core) 引擎，执行 **ISO 12233:2023** 标准下的 MTF/SFR 推演、模型训练。
 
 ## 核心功能模块
 
@@ -143,4 +143,4 @@ ros2 run mtf_analyzer mtf_detector_udp_node
 * **资历**：19 年跨国 Tier 1 项目管理与智能摄像头自动化测试开发经验
 * **技术方向**：Teststand/LabVIEW/Python 并行自动测试平台架构开发、智能摄像头、计算机视觉、SFR算法、ROS2集成
 * **联系邮箱**：<lei.3.zhang@gmail.com>
-* **最后更新日期**：2026-02-17
+* **最后更新日期**：2026-02-19

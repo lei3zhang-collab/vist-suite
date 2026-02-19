@@ -47,7 +47,7 @@ class MtfYoloViewer(Node):
         self.dist_thresh = 50.0 
         
         # 2. UDP 通讯配置 (用于与上位机分析软件交互)
-        self.pc_ip = "192.168.0.115"  # 远程计算 PC 的 IP 地址
+        self.pc_ip = "192.168.0.111"  # 远程计算 PC 的 IP 地址
         self.pc_port = 5005           # 发送端口
         self.udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
@@ -65,7 +65,7 @@ class MtfYoloViewer(Node):
         self.bridge = CvBridge()
         self.subscription = self.create_subscription(
             Image, '/camera/color/image_raw', self.listener_callback, 10)
-        
+        self.get_logger().info(f'Remote IP 地址: {self.pc_ip}')
         self.get_logger().info('MTF 亮度原始数据发送版已启动。按 "s" 发送数据。')
 
     def sort_boxes_with_scores(self, boxes, scores):
